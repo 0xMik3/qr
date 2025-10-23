@@ -1,49 +1,73 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import { View,Text,TextInput,TouchableOpacity,StyleSheet,Alert,Dimensions } from "react-native";
 import RNPickerSelect from 'react-native-picker-select';
+import { process, Operation } from '@/utils/api';
+import { showAlert } from '@/utils/alerts';
+
+//import { Checkbox } from 'react-native-paper';
 
 
 const CLASSROOMS = [
-    {label: 'Aula', value: '01'},
-    {label: 'Laboratorio', value: '02'},
+    {label: 'Aula', value: 2},
+    {label: 'Laboratorio', value: 1},
+    {label: 'No Aplica', value: 3}
 ]
 
-export default function NewUser() {
+
+
+
+export default function NewClassroom() {
+        
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    
+
+
     const [classroom, setClassroom] = useState({
-        number: '',
+        name: '',
         type: '',
-        assignedTo: '',
-        buildingNumber: '' 
     });
     
-    const handleSubmit = () => {
-        try {
-            // const response = await process(SAVE,'orders',order)
-            setClassroom({
-                number: '',
-                type: '',
-                assignedTo: '',
-                buildingNumber: '' 
-                })
-            Alert.alert('Aula agregada exitosamente')
-            } catch(e){
-                console.log(e)
+    const handleSubmit = async () => {
+            const trimmedClassroom = {
+                name: classroom.name.trim(),
+                type: parseInt(classroom.type)
+            };
+    
+            if (!trimmedClassroom.name) {
+                return showAlert('Campo requerido', 'Por favor, ingresa el nombre.');
             }
-    }
+    
+            try {
+                const response = await process(Operation.SAVE, 'classroom', trimmedClassroom);
+                if (response?.status === 200 || response?.status === 201) {
+                    setClassroom({
+                        name: '',
+                        type: ''
+                    });
+                    return showAlert('Éxito', 'Aula agregada exitosamente.');
+                } else {
+                    return showAlert('Error', 'El servidor no respondió correctamente.');
+                }
+            }catch(e){
+                
+                return showAlert('Error', 'No se pudo agregar el aula.');
+            }
+        };
+
     return(
          <View style={{ flex: 1, padding: 20 }}>
-            <Text style={{ fontSize: 25 }}>Registrar aula</Text>
-            <Text style={styles.text}>Número de aula</Text>
+            <Text style={styles.text}>Nombre de la carrera</Text>
             <TextInput
-                value={classroom.number}
+                value={classroom.name}
                 style={styles.input}
-                onChangeText={(text)=>setClassroom({...classroom,number:text})}
+                onChangeText={(text)=>setClassroom({...classroom,name:text})}
             />
 
-            <Text style={styles.text}>Tipo de aula</Text>
+            <Text style={styles.text}>Tipo de Aula</Text>
             <View style={styles.input}>
                 <RNPickerSelect
-                    onValueChange={(value) => setClassroom({...classroom,type:value})}
+                    onValueChange={(value) => setClassroom({...classroom, type:value})}
                     items={CLASSROOMS}
                     placeholder={{
                         label: '--Seleccione--',
@@ -51,29 +75,7 @@ export default function NewUser() {
                         color: 'black',
                     }}
                 />
-            </View>
-
-            <Text style={styles.text}>Carrera asignada</Text>
-            <TextInput
-                value={classroom.assignedTo}
-                keyboardType="numeric"
-                placeholder="#"
-                style={styles.input}
-                onChangeText={(text)=>setClassroom({...classroom,assignedTo:text})}
-            />
-            <Text style={styles.text}>Número de edificio</Text>
-            <TextInput
-                value={classroom.buildingNumber}
-                keyboardType="numeric"
-                placeholder="#"
-                style={styles.input}
-                onChangeText={(text)=>setClassroom({...classroom,buildingNumber:text})}
-            />
-            
-
-            
-            
-            
+           </View>
 
             <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                 <Text style={{ fontSize: 18, color: 'white' }}>Registrar Aula</Text>

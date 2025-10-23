@@ -50,9 +50,24 @@ export default function RootLayout() {
           }}
         />
         <Drawer.Screen
+          name="schedules/index" 
+          options={{
+            drawerLabel: 'Agregar Clase',
+            title: 'Agregar Clase',
+          }}
+        />
+        
+        <Drawer.Screen
           name="departments/index" 
           options={{
             drawerLabel: 'Registrar Jefatura',
+            title: 'Registrar Jefatura',
+          }}
+        />
+        <Drawer.Screen
+          name="departments/setHead" 
+          options={{
+            drawerLabel: 'Actualizar Jefe de Jefatura',
             title: 'Registrar Jefatura',
           }}
         />
@@ -61,6 +76,14 @@ export default function RootLayout() {
           options={{
             drawerLabel: 'Registrar Aula',
             title: 'Registrar Aula',
+          }}
+        />
+
+        <Drawer.Screen
+          name="users/changePassword" 
+          options={{
+            drawerLabel: 'Actualizar contraseña',
+            title: 'Actualizar contraseña',
           }}
         />
     

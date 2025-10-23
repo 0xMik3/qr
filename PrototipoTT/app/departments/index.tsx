@@ -1,114 +1,43 @@
 import React, {useState, useEffect} from 'react'
 import { View,Text,TextInput,TouchableOpacity,StyleSheet,Alert,Dimensions } from "react-native";
 import RNPickerSelect from 'react-native-picker-select';
-// import { useUpdate } from '../../Context/updateScreenContext';
+import { showAlert } from '@/utils/alerts';
+import { process, Operation } from '@/utils/api';
 
 
-const USERS = [
-    {name: 'Profesor', id: 1},
-    {name: 'Profesor 2', id: 2},
-    {name: 'Profesor 3', id: 3}
-]
-
-export default function NewDepartment() {
-    // const {updateScreen,setUpdateScreen} = useUpdate()
+export default function NewDepartment() { 
     const [department, setDepartment] = useState({
-        userId: 0,
         name: '',
-        email: '',
-        extension: '' 
     });
     
-    const [loading,setLoading] = useState(true)
-    const [users,setUsers] = useState([])
-    
-    async function fetchData(){
-        try {
-            setLoading(true)
-              // const clientsResponse = await process(FIND,'clients')
-    
-            const responseUsers = USERS
-            let mutatedUsers: any = []
-            responseUsers.forEach(user => {
-            let newUser = {
-                label:user.name,
-                value:user.id
-            }
-            mutatedUsers.push(newUser)
-            });
-            setUsers(mutatedUsers)
-    
-            setLoading(false)
-        } catch(e){
-            console.log(e)
+    const handleSubmit = async () => {
+        const trimmedDepartment = { name: department.name.trim() };
+
+        if (!trimmedDepartment.name) {
+            return showAlert("Campo requerido", "Por favor, ingresa el nombre.");
         }
-    }
-        
-    useEffect(()=>{
-        fetchData()
-    },[])
-          
-    // useEffect(()=>{
-    //     if(updateScreen){
-    //         fetchData()
-    //         setUpdateScreen(false)
-    //     }
-    // },[updateScreen])
 
-
-    const handleSubmit = () => {
-        console.log(department)
         try {
-            // const response = await process(SAVE,'orders',order)
-            Alert.alert('Jefatura agregado exitosamente')
-            } catch(e){
-                console.log(e)
+            const response = await process(Operation.SAVE, "department", trimmedDepartment);
+            if (response?.status === 200 || response?.status === 201) {
+                setDepartment({ name: "" });
+                 return showAlert("Éxito", "Jefatura agregada exitosamente.");
+            } else {
+                 return showAlert("Error", "El servidor no respondió correctamente.");
             }
-    }
+        } catch (e) {
+             return showAlert("Error", "No se pudo agregar la jefatura.");
+        }
+    };
+
     return(
          <View style={{ flex: 1, padding: 20 }}>
-            
-
-            <Text style={{ fontSize: 25 }}>Registrar jefatura</Text>
-
-            <Text style={styles.text}>Jefe de departamento</Text>
-            <View style={styles.input}>
-                <RNPickerSelect
-                    onValueChange={(value) => setDepartment({...department,userId:value})}
-                    items={users}
-                    placeholder={{
-                        label: '--Seleccione--',
-                        value: null,
-                        color: 'black',
-                    }}
-                />
-           </View>
-
-            <Text style={styles.text}>Nombre del departamento</Text>
+            <Text style={styles.text}>Nombre de jefatura</Text>
             <TextInput
                 value={department.name}
                 style={styles.input}
                 onChangeText={(text)=>setDepartment({...department,name:text})}
             />
-
-            <Text style={styles.text}>Correo</Text>
-            <TextInput
-                value={department.email}
-                keyboardType="numeric"
-                placeholder="#"
-                style={styles.input}
-                onChangeText={(text)=>setDepartment({...department,email:text})}
-            />
-
-            <Text style={styles.text}>Extensión</Text>
-            <TextInput
-                value={department.extension}
-                keyboardType="numeric"
-                placeholder="#"
-                style={styles.input}
-                onChangeText={(text)=>setDepartment({...department,extension:text})}
-            />
-            
 
             <TouchableOpacity style={styles.button} onPress={handleSubmit}>
                 <Text style={{ fontSize: 18, color: 'white' }}>Registrar Jefatura</Text>
